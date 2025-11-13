@@ -1,0 +1,144 @@
+﻿@import url('https://api.fontshare.com/v2/css?f[]=cabinet-grotesk@400,500,600,700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  margin: 0;
+  font-family: "Cabinet Grotesk", sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  @apply bg-gray-50 dark:bg-gray-950 text-gray-900 dark:text-gray-100;
+}
+
+/* Global dark mode styles for form elements - Apply to all form elements */
+@layer base {
+  /* Apply dark mode to all inputs, textareas, and selects that don't have explicit dark classes */
+  input:not([type="checkbox"]):not([type="radio"]):not([class*="dark"]),
+  textarea:not([class*="dark"]),
+  select:not([class*="dark"]) {
+    @apply dark:bg-gray-800 dark:text-white dark:border-gray-600;
+  }
+  
+  /* Placeholder colors for dark mode */
+  input:not([type="checkbox"]):not([type="radio"]):not([class*="dark"])::placeholder,
+  textarea:not([class*="dark"])::placeholder {
+    @apply dark:placeholder-gray-500;
+  }
+  
+  /* Focus states for dark mode */
+  input:not([type="checkbox"]):not([type="radio"]):not([class*="dark"]):focus,
+  textarea:not([class*="dark"]):focus,
+  select:not([class*="dark"]):focus {
+    @apply dark:border-primary-500 dark:ring-primary-500;
+  }
+}
+
+/* Global text color for paragraphs and headings */
+p:not([class*="text-"]),
+h1:not([class*="text-"]),
+h2:not([class*="text-"]),
+h3:not([class*="text-"]),
+h4:not([class*="text-"]),
+h5:not([class*="text-"]),
+h6:not([class*="text-"]) {
+  @apply text-gray-900 dark:text-gray-100;
+}
+
+/* Labels default dark mode */
+label:not([class*="text-"]) {
+  @apply text-gray-700 dark:text-gray-300;
+}
+
+#root {
+  min-height: 100vh;
+}
+
+/* Hide native scrollbar for the sidebar while keeping scroll functionality */
+.nk-sidebar .nk-sidebar-body::-webkit-scrollbar,
+.nk-sidebar .nk-sidebar-body *::-webkit-scrollbar,
+.no-scrollbar::-webkit-scrollbar {
+  width: 0 !important;
+  height: 0 !important;
+}
+
+.nk-sidebar .nk-sidebar-body,
+.no-scrollbar {
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE 10+ */
+}
+
+/* Template sidebar styling */
+.nk-sidebar {
+  background: white;
+}
+
+.dark .nk-sidebar {
+  background: #030712; /* gray-950 */
+}
+
+/* Menu item hover effects - Template style */
+.nk-menu-item:hover .nk-menu-link {
+  background-color: transparent;
+}
+
+.nk-menu-link:hover {
+  background-color: rgba(59, 130, 246, 0.1); /* primary-500 with opacity */
+}
+
+/* Active menu item styling - Template style */
+.nk-menu-item.active .nk-menu-link,
+.nk-menu-link.active {
+  background-color: rgba(59, 130, 246, 0.1);
+  color: #3b82f6; /* primary-500 */
+}
+
+/* Submenu animations like template */
+.nk-menu-sub {
+  transition: all 0.3s ease-in-out;
+  overflow: hidden;
+}
+
+.nk-menu-sub.hidden {
+  max-height: 0;
+  opacity: 0;
+}
+
+.nk-menu-sub:not(.hidden) {
+  max-height: 500px;
+  opacity: 1;
+}
+
+/* Submenu item styling - Template style */
+.nk-menu-sub .nk-menu-link {
+  font-size: 0.875rem;
+  color: #64748b; /* slate-500 */
+}
+
+.dark .nk-menu-sub .nk-menu-link {
+  color: #64748b; /* slate-500 */
+}
+
+.nk-menu-sub .nk-menu-link:hover {
+  color: #3b82f6; /* primary-500 */
+  background-color: rgba(59, 130, 246, 0.1);
+}
+
+/* Icon colors - Template style */
+.nk-menu-link .text-slate-400 {
+  color: #94a3b8; /* slate-400 */
+}
+
+.nk-menu-link:hover .text-slate-400 {
+  color: #3b82f6; /* primary-500 */
+}
+
+/* Text colors - Template style */
+.nk-menu-link .text-slate-600 {
+  color: #475569; /* slate-600 */
+}
+
+.dark .nk-menu-link .text-slate-600 {
+  color: #64748b; /* slate-500 */
+}

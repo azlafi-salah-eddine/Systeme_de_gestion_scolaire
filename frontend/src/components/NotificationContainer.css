@@ -1,0 +1,71 @@
+/* Notification animations */
+@keyframes slideInFromRight {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slideOutToRight {
+  from {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  to {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+}
+
+.notification-enter {
+  animation: slideInFromRight 0.3s ease-out;
+}
+
+.notification-exit {
+  animation: slideOutToRight 0.3s ease-in;
+}
+
+/* Ensure notifications are always on top */
+.notification-container {
+  position: fixed !important;
+  top: 1rem !important;
+  right: 1rem !important;
+  z-index: 9999 !important;
+  pointer-events: none;
+  max-width: calc(100vw - 2rem);
+  padding: 0 1rem;
+}
+
+.notification-item {
+  pointer-events: auto;
+  margin-bottom: 0.5rem;
+  width: 24rem; /* 384px - w-96 */
+  min-width: 20rem; /* 320px - min-w-80 */
+  max-width: 28rem; /* 448px - max-w-md */
+}
+
+/* Responsive design for mobile */
+@media (max-width: 640px) {
+  .notification-container {
+    right: 0.5rem !important;
+    left: 0.5rem !important;
+    top: 1rem !important;
+  }
+  
+  .notification-item {
+    width: 100% !important;
+    min-width: auto !important;
+    max-width: 100% !important;
+  }
+}
+
+.notification-text {
+  word-wrap: break-word;
+  word-break: break-word;
+  white-space: normal;
+  line-height: 1.5;
+}
