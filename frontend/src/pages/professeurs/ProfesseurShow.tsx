@@ -69,7 +69,7 @@ const ProfesseurShow: React.FC = () => {
         } else {
           const errorMessage = e?.response?.data?.message || e?.message || 'Erreur de chargement';
           setError(errorMessage);
-          showError(errorMessage);
+          showError('Erreur', errorMessage);
         }
       } finally {
         setLoading(false);
@@ -320,7 +320,7 @@ const ProfesseurShow: React.FC = () => {
               setError(null);
               const res = await api.post(`/v1/professeurs/${id}/reset-password`);
               if (res.data.success) {
-                showSuccess('Mot de passe réinitialisé avec succès');
+                showSuccess('Succès', 'Mot de passe réinitialisé avec succès');
                 // Recharger les données du professeur
                 const profRes = await api.get(`/v1/professeurs/${id}`);
                 setProf(profRes.data.data);
@@ -330,7 +330,7 @@ const ProfesseurShow: React.FC = () => {
             } catch (e: any) {
               const errorMessage = e?.response?.data?.message || 'Erreur lors de la réinitialisation';
               setError(errorMessage);
-              showError(errorMessage);
+              showError('Erreur', errorMessage);
               setConfirmResetState(prev => ({ ...prev, loading: false }));
             }
           }}

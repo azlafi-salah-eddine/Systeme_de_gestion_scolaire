@@ -16,12 +16,25 @@ class SmsController extends Controller
     {
         $data = $request->validated();
 
+        // Handle destinataire_id - may be null for 'tous' or 'personnalise'
+        $destinataireId = $data['destinataire_id'] ?? null;
+        
+        // Default telephone (will be populated by job based on type)
+        $telephone = 'pending'; // Placeholder value
+        if (isset($data['numeros_personnalises']) && is_array($data['numeros_personnalises'])) {
+            $telephone = implode(',', $data['numeros_personnalises']);
+        }
+
         $notification = SmsNotification::create([
             'destinataire_type' => $data['destinataire_type'],
-            'destinataire_id' => $data['destinataire_id'],
+            'destinataire_id' => $destinataireId,
+            'telephone' => $telephone,
             'message' => $data['message'],
             'statut' => 'en_attente',
             'date_envoi' => now(),
+            'type' => 'general',
+            'urgent' => false,
+            'numeros_personnalises' => isset($data['numeros_personnalises']) ? json_encode($data['numeros_personnalises']) : null,
         ]);
 
         if (class_exists(SendSmsJob::class)) {

@@ -48,7 +48,7 @@ const FraisScolairesIndex: React.FC = () => {
       setLoading(true);
       const response = await fraisScolaireService.getFraisScolaires({
         type: typeFilter || undefined,
-        niveau_id: niveauFilter || undefined,
+        niveau_id: niveauFilter ? parseInt(niveauFilter, 10) : undefined,
         per_page: 10,
         page: currentPage
       });

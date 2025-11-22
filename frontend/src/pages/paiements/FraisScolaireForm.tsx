@@ -55,7 +55,7 @@ const FraisScolaireForm: React.FC = () => {
         anneesScolaires: anneesRes || []
       });
     } catch (error) {
-      showError('Erreur lors du chargement des options');
+      showError('Erreur', 'Erreur lors du chargement des options');
     } finally {
       setLoadingOptions(false);
     }
@@ -79,7 +79,7 @@ const FraisScolaireForm: React.FC = () => {
         });
       }
     } catch (error) {
-      showError('Erreur lors du chargement des données');
+      showError('Erreur', 'Erreur lors du chargement des données');
     } finally {
       setLoading(false);
     }
@@ -125,10 +125,10 @@ const FraisScolaireForm: React.FC = () => {
       
       if (isEdit) {
         await fraisScolaireService.updateFraisScolaire(parseInt(id!), formData);
-        showSuccess('Frais scolaire mis à jour avec succès');
+        showSuccess('Succès', 'Frais scolaire mis à jour avec succès');
       } else {
         await fraisScolaireService.createFraisScolaire(formData);
-        showSuccess('Frais scolaire créé avec succès');
+        showSuccess('Succès', 'Frais scolaire créé avec succès');
       }
       
       navigate('/frais-scolaires');

@@ -1,9 +1,8 @@
-import api from './api';
-
 export interface Professeur {
   id: number;
   nom: string;
   prenom: string;
+  nom_complet?: string;
   diplome?: string;
   anciennete?: number;
   telephone?: string;

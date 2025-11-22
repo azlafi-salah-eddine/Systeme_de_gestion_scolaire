@@ -180,7 +180,8 @@ const EleveEdit: React.FC = () => {
         
         // Set selected niveau based on classe (si l'élève a une classe)
         if (eleve.classe && eleve.classe.niveau) {
-          const niveauValue = typeof eleve.classe.niveau === 'object' ? eleve.classe.niveau.nom : eleve.classe.niveau;
+          const rawNiveau = eleve.classe?.niveau;
+          const niveauValue = rawNiveau && typeof rawNiveau === 'object' ? (rawNiveau as any).nom : String(rawNiveau || '');
           setSelectedNiveau(niveauValue);
         } else {
           // Si l'élève n'a pas de classe, réinitialiser le niveau

@@ -72,6 +72,14 @@ import {
   FaToggleOff,
   FaCircle,
 } from 'react-icons/fa';
+import {
+  FiSend,
+  FiMessageSquare,
+  FiGlobe,
+  FiLayers,
+  FiAlertTriangle,
+  FiTrendingUp,
+} from 'react-icons/fi';
 
 interface IconProps {
   name: string;
@@ -167,6 +175,12 @@ const Icon: React.FC<IconProps> = ({ name, className = '', size = 'md' }) => {
     'save': <FaSave className={`${sizes[size]} ${className}`} />,
     'ban': <FaBan className={`${sizes[size]} ${className}`} />,
     'user-check': <FaUserCheck className={`${sizes[size]} ${className}`} />,
+    'send': <FiSend className={`${sizes[size]} ${className}`} />,
+    'message-square': <FiMessageSquare className={`${sizes[size]} ${className}`} />,
+    'globe': <FiGlobe className={`${sizes[size]} ${className}`} />,
+    'layers': <FiLayers className={`${sizes[size]} ${className}`} />,
+    'alert-triangle': <FiAlertTriangle className={`${sizes[size]} ${className}`} />,
+    'trending-up': <FiTrendingUp className={`${sizes[size]} ${className}`} />,
   };
 
   return <>{icons[name] || <span className={`${sizes[size]} ${className}`}>?</span>}</>;

@@ -1,4 +1,4 @@
-import api, { cleanJsonResponse } from './api';
+import { cleanJsonResponse } from './api';
 
 export interface Absence {
   id: number;
@@ -20,6 +20,14 @@ export interface Absence {
     id: number;
     nom: string;
     prenom: string;
+    nom_fr?: string;
+    prenom_fr?: string;
+    matricule?: string;
+    date_naissance?: string;
+    sexe?: string;
+    nationalite?: string;
+    telephone_urgence?: string;
+    personne_urgence?: string;
     classe?: {
       id: number;
       nom: string;
@@ -29,11 +37,23 @@ export interface Absence {
     id: number;
     nom: string;
     prenom: string;
+    diplome?: string;
+    anciennete?: number;
   };
   matiere?: {
     id: number;
     nom: string;
+    code?: string;
+    description?: string;
   };
+}
+
+export interface ConsecutiveAbsenceGroup {
+  dates: string[];
+  count: number;
+  start_date: string;
+  end_date: string;
+  absences: Absence[];
 }
 
 export interface AbsencePayload {

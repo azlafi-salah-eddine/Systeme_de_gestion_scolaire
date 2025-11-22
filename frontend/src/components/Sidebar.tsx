@@ -155,15 +155,7 @@ const menuData = [
             { text: "Historique des messages", link: "/sms/history" }
         ]
     },
-    { 
-        icon: "mail", 
-        text: "Notifications par E-mail", 
-        link: "#",
-        sub: [
-            { text: "Envoi de E-mail", link: "/sms/send" },
-            { text: "Historique des messages", link: "/sms/history" }
-        ]
-    },
+
     
     
 
@@ -441,7 +433,7 @@ const Sidebar: React.FC<SidebarProps> = ({ setSidebarVisibility }) => {
                     // Récupérer l'ID du professeur et créer un lien direct
                     const professeurId = (user as any)?.professeur_id;
                     if (professeurId) {
-                        item = { ...item, link: `/professeurs/${professeurId}/timetable`, sub: undefined } as any;
+                        item = { ...item, link: `/professeurs/${professeurId}/timetable`, sub: undefined, icon: item.icon, text: item.text } as any;
                     } else {
                         // Si pas d'ID, ne pas afficher le menu
                         return null;
@@ -450,12 +442,12 @@ const Sidebar: React.FC<SidebarProps> = ({ setSidebarVisibility }) => {
                 
                 // Pour les professeurs, si c'est "Classes", le transformer en lien direct vers la liste
                 if (isProfesseur && item.text === 'Classes' && (item as any).forProfesseur === 'direct') {
-                    item = { ...item, link: '/classes', sub: undefined } as any;
+                    item = { ...item, link: '/classes', sub: undefined, icon: item.icon, text: item.text } as any;
                 }
                 
                 // Pour les professeurs, si c'est "Absences", le transformer en lien direct vers la liste
                 if (isProfesseur && item.text === 'Absences' && (item as any).forProfesseur === 'direct') {
-                    item = { ...item, link: '/absences', sub: undefined } as any;
+                    item = { ...item, link: '/absences', sub: undefined, icon: item.icon, text: item.text } as any;
                 }
                 
                 // Si c'est un item avec sous-menu, filtrer les sous-items
@@ -465,7 +457,7 @@ const Sidebar: React.FC<SidebarProps> = ({ setSidebarVisibility }) => {
                         return null; // Ne pas afficher le menu si aucun sous-item n'est accessible
                     }
                     // Créer une copie avec les sous-items filtrés
-                    item = { ...item, sub: filteredSub };
+                    item = { ...item, sub: filteredSub, icon: item.icon, text: item.text } as any;
                 }
                 
                 // Pour les professeurs : NE PAS AFFICHER "Accueil"

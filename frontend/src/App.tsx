@@ -85,6 +85,9 @@ import NiveauShow from './pages/niveaux/NiveauShow'
 import ActivitesIndex from './pages/activites/ActivitesIndex'
 import ActiviteForm from './pages/activites/ActiviteForm'
 import ActiviteShow from './pages/activites/ActiviteShow'
+// SMS pages
+import SendSms from './pages/sms/SendSms'
+import SmsHistory from './pages/sms/SmsHistory'
 
 const RoleDefaultRedirect: React.FC = () => {
   const { user, isProfesseur, isEleve } = useAuth();
@@ -454,6 +457,22 @@ const App: React.FC = () => {
           <Route path="/activites/new" element={<ProtectedRoute requiredRoles={["admin", "super_admin"]}><MainLayout><ActiviteForm /></MainLayout></ProtectedRoute>} />
           <Route path="/activites/:id" element={<ProtectedRoute requiredRoles={["admin", "super_admin", "eleve"]}><MainLayout><ActiviteShow /></MainLayout></ProtectedRoute>} />
           <Route path="/activites/:id/edit" element={<ProtectedRoute requiredRoles={["admin", "super_admin"]}><MainLayout><ActiviteForm /></MainLayout></ProtectedRoute>} />
+
+          {/* SMS routes (Admin uniquement) */}
+          <Route path="/sms/send" element={
+            <ProtectedRoute requiredRoles={["admin", "super_admin"]}>
+              <MainLayout>
+                <SendSms />
+              </MainLayout>
+            </ProtectedRoute>
+          } />
+          <Route path="/sms/history" element={
+            <ProtectedRoute requiredRoles={["admin", "super_admin"]}>
+              <MainLayout>
+                <SmsHistory />
+              </MainLayout>
+            </ProtectedRoute>
+          } />
 
           {/* Routes élève: alias vers les pages existantes */}
           <Route path="/eleves/me/timetable" element={<ProtectedRoute><EleveTimetableRedirect /></ProtectedRoute>} />

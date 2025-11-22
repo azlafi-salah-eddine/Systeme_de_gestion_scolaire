@@ -115,7 +115,8 @@ export const exportTimetable = async (
       document.body.removeChild(link);
     }
   } catch (error) {
-    throw new Error(`Erreur lors de l'exportation: ${error.message}`);
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    throw new Error(`Erreur lors de l'exportation: ${errorMessage}`);
   }
   finally {
     // Restore bumped styles

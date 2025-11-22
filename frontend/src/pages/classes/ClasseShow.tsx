@@ -5,10 +5,11 @@ import Card from '../../components/ui/Card';
 import Button from '../../components/ui/Button';
 import Icon from '../../components/Icon';
 import { classeService } from '../../services/classeService';
-import { eleveService, type Eleve } from '../../services/eleveService';
+import { eleveService } from '../../services/eleveService';
 import { useAnneeScolaire } from '../../contexts/AnneeScolaireContext';
 import { useAuth } from '../../contexts/AuthContext';
 import type { Classe } from '../../services/classeService';
+import type { Eleve } from '../../types/eleve';
 import niveauService, { type NiveauItem } from '../../services/niveauService';
 
 const ClasseShow: React.FC = () => {
@@ -215,7 +216,7 @@ const ClasseShow: React.FC = () => {
               <div className="font-medium text-gray-900 dark:text-white">
                 {(() => {
                   // Si niveau est un objet (relation), utiliser son nom
-                  const niveauNom = typeof classe.niveau === 'object' && classe.niveau ? classe.niveau.nom : classe.niveau;
+                  const niveauNom = typeof classe.niveau === 'object' && classe.niveau ? String(classe.niveau.nom) : String(classe.niveau || '');
                   const n = niveaux.find(nv => nv.nom === niveauNom);
                   if (n && n.active === false) {
                     return (

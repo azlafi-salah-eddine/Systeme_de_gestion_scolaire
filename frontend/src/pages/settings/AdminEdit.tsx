@@ -25,7 +25,7 @@ const AdminEdit: React.FC = () => {
       } catch (e: any) {
         const errorMessage = e?.response?.data?.message || 'Erreur de chargement';
         setError(errorMessage);
-        showError(errorMessage);
+        showError('Erreur', errorMessage);
       } finally {
         setLoading(false);
       }
@@ -108,7 +108,7 @@ const AdminEdit: React.FC = () => {
       }
       
       setError(errorMessage);
-      showError(errorMessage);
+      showError('Erreur', errorMessage);
     } finally {
       setSaving(false);
     }

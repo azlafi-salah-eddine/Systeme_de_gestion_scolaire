@@ -43,6 +43,7 @@ const PaiementsElevesIndex: React.FC = () => {
   const [classes, setClasses] = useState<ClasseOption[]>([]);
   const [loadingFilters, setLoadingFilters] = useState(false);
   const [meta, setMeta] = useState<PaiementEleveResponse['meta'] | null>(null);
+  const [showCharts, setShowCharts] = useState(false);
 
   // Mettre à jour le filtre avec l'année active quand elle est disponible (pour Admin/Prof)
   useEffect(() => {
@@ -74,7 +75,7 @@ const PaiementsElevesIndex: React.FC = () => {
       // Envoyer l'année scolaire sélectionnée pour générer les paiements pour toutes les classes de cette année
       const response = await fraisScolaireService.genererPaiementsMensuels(mois, selectedAnneeScolaire);
       if (response.success) {
-        const data = response.data || {};
+        const data: any = response.data || {};
         let message = response.message || 'Paiements générés avec succès';
         
         // Améliorer le message avec les détails
@@ -426,6 +427,236 @@ const PaiementsElevesIndex: React.FC = () => {
         ]}
       />
 
+      {/* Charts Section */}
+      <Card>
+        <div className="p-6">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-lg font-medium text-gray-900 dark:text-white">
+              Visualisations Financières
+            </h3>
+            <Button
+              variant={showCharts ? 'primary' : 'outline'}
+              onClick={() => setShowCharts(!showCharts)}
+            >
+              <Icon name={showCharts ? 'eye-off' : 'eye'} size="sm" className="mr-2" />
+              {showCharts ? 'Masquer' : 'Afficher'} les graphiques
+            </Button>
+          </div>
+
+          {showCharts && (
+            <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+              {/* Chart 1: Payment Status Distribution */}
+              <div className="p-4 border border-gray-200 dark:border-gray-700 rounded-lg">
+                <h4 className="mb-4 text-base font-medium text-gray-900 dark:text-white">
+                  Répartition par Statut
+                </h4>
+                <div className="space-y-3">
+                  {(() => {
+                    const statutCounts = filteredPaiements.reduce((acc, p) => {
+                      acc[p.statut] = (acc[p.statut] || 0) + 1;
+                      return acc;
+                    }, {} as Record<string, number>);
+
+                    const total = filteredPaiements.length;
+                    const statuts = [
+                      { key: 'regle', label: 'Réglé', color: 'bg-green-500', textColor: 'text-green-700 dark:text-green-400' },
+                      { key: 'partiel', label: 'Partiel', color: 'bg-blue-500', textColor: 'text-blue-700 dark:text-blue-400' },
+                      { key: 'en_attente', label: 'En Attente', color: 'bg-yellow-500', textColor: 'text-yellow-700 dark:text-yellow-400' },
+                      { key: 'en_retard', label: 'En Retard', color: 'bg-red-500', textColor: 'text-red-700 dark:text-red-400' }
+                    ];
+
+                    return statuts.map(statut => {
+                      const count = statutCounts[statut.key] || 0;
+                      const percentage = total > 0 ? (count / total) * 100 : 0;
+                      return (
+                        <div key={statut.key}>
+                          <div className="flex items-center justify-between mb-1">
+                            <span className={`text-sm font-medium ${statut.textColor}`}>
+                              {statut.label}
+                            </span>
+                            <span className="text-sm font-semibold text-gray-900 dark:text-white">
+                              {count} ({percentage.toFixed(1)}%)
+                            </span>
+                          </div>
+                          <div className="w-full h-3 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+                            <div
+                              className={`h-full ${statut.color} transition-all duration-500`}
+                              style={{ width: `${percentage}%` }}
+                            />
+                          </div>
+                        </div>
+                      );
+                    });
+                  })()}
+                </div>
+              </div>
+
+              {/* Chart 2: Payment Type Distribution */}
+              <div className="p-4 border border-gray-200 dark:border-gray-700 rounded-lg">
+                <h4 className="mb-4 text-base font-medium text-gray-900 dark:text-white">
+                  Répartition par Type de Frais
+                </h4>
+                <div className="space-y-3">
+                  {(() => {
+                    const typeTotals = filteredPaiements.reduce((acc, p) => {
+                      const type = p.frais_scolaire?.type || 'autre';
+                      if (!acc[type]) {
+                        acc[type] = { montantDu: 0, montantPaye: 0, count: 0 };
+                      }
+                      acc[type].montantDu += Number(p.montant_du) || 0;
+                      acc[type].montantPaye += Number(p.montant_paye) || 0;
+                      acc[type].count += 1;
+                      return acc;
+                    }, {} as Record<string, { montantDu: number; montantPaye: number; count: number }>);
+
+                    const totalDu = Object.values(typeTotals).reduce((sum, t) => sum + t.montantDu, 0);
+
+                    const types = [
+                      { key: 'scolarite', label: 'Scolarité', color: 'bg-indigo-500', textColor: 'text-indigo-700 dark:text-indigo-400' },
+                      { key: 'cantine', label: 'Cantine', color: 'bg-purple-500', textColor: 'text-purple-700 dark:text-purple-400' },
+                      { key: 'transport', label: 'Transport', color: 'bg-pink-500', textColor: 'text-pink-700 dark:text-pink-400' },
+                      { key: 'autre', label: 'Autre', color: 'bg-gray-500', textColor: 'text-gray-700 dark:text-gray-400' }
+                    ];
+
+                    return types.map(type => {
+                      const data = typeTotals[type.key];
+                      if (!data) return null;
+                      const percentage = totalDu > 0 ? (data.montantDu / totalDu) * 100 : 0;
+                      const tauxPaiement = data.montantDu > 0 ? (data.montantPaye / data.montantDu) * 100 : 0;
+                      
+                      return (
+                        <div key={type.key}>
+                          <div className="flex items-center justify-between mb-1">
+                            <span className={`text-sm font-medium ${type.textColor}`}>
+                              {type.label}
+                            </span>
+                            <span className="text-sm font-semibold text-gray-900 dark:text-white">
+                              {paiementEleveService.formatMontant(data.montantDu)}
+                            </span>
+                          </div>
+                          <div className="w-full h-3 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+                            <div
+                              className={`h-full ${type.color} transition-all duration-500`}
+                              style={{ width: `${percentage}%` }}
+                            />
+                          </div>
+                          <div className="flex items-center justify-between mt-1">
+                            <span className="text-xs text-gray-500 dark:text-gray-400">
+                              {data.count} paiement{data.count > 1 ? 's' : ''}
+                            </span>
+                            <span className="text-xs font-medium text-green-600 dark:text-green-400">
+                              {tauxPaiement.toFixed(1)}% payé
+                            </span>
+                          </div>
+                        </div>
+                      );
+                    }).filter(Boolean);
+                  })()}
+                </div>
+              </div>
+
+              {/* Chart 3: Monthly Evolution */}
+              <div className="p-4 border border-gray-200 dark:border-gray-700 rounded-lg lg:col-span-2">
+                <h4 className="mb-4 text-base font-medium text-gray-900 dark:text-white">
+                  Évolution Mensuelle des Paiements
+                </h4>
+                <div className="space-y-3">
+                  {(() => {
+                    const monthlyData = filteredPaiements.reduce((acc, p) => {
+                      const mois = p.mois;
+                      if (!acc[mois]) {
+                        acc[mois] = { montantDu: 0, montantPaye: 0, montantRestant: 0 };
+                      }
+                      acc[mois].montantDu += Number(p.montant_du) || 0;
+                      acc[mois].montantPaye += Number(p.montant_paye) || 0;
+                      acc[mois].montantRestant += Number(p.montant_restant) || 0;
+                      return acc;
+                    }, {} as Record<string, { montantDu: number; montantPaye: number; montantRestant: number }>);
+
+                    const months = Object.entries(monthlyData)
+                      .sort((a, b) => a[0].localeCompare(b[0]))
+                      .slice(-6); // Last 6 months
+
+                    const maxMontant = Math.max(...months.map(([_, data]) => data.montantDu));
+
+                    return months.map(([mois, data]) => {
+                      const percentage = maxMontant > 0 ? (data.montantPaye / maxMontant) * 100 : 0;
+                      const tauxPaiement = data.montantDu > 0 ? (data.montantPaye / data.montantDu) * 100 : 0;
+
+                      return (
+                        <div key={mois}>
+                          <div className="flex items-center justify-between mb-1">
+                            <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                              {paiementEleveService.formatMois(mois)}
+                            </span>
+                            <div className="flex items-center gap-3">
+                              <span className="text-sm text-gray-600 dark:text-gray-400">
+                                Payé: {paiementEleveService.formatMontant(data.montantPaye)}
+                              </span>
+                              <span className="text-sm text-gray-600 dark:text-gray-400">
+                                / {paiementEleveService.formatMontant(data.montantDu)}
+                              </span>
+                              <span className={`text-sm font-semibold ${
+                                tauxPaiement >= 80 ? 'text-green-600 dark:text-green-400' :
+                                tauxPaiement >= 50 ? 'text-yellow-600 dark:text-yellow-400' :
+                                'text-red-600 dark:text-red-400'
+                              }`}>
+                                {tauxPaiement.toFixed(1)}%
+                              </span>
+                            </div>
+                          </div>
+                          <div className="relative w-full h-3 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+                            <div
+                              className="h-full bg-gradient-to-r from-green-400 to-green-600 transition-all duration-500"
+                              style={{ width: `${percentage}%` }}
+                            />
+                          </div>
+                        </div>
+                      );
+                    });
+                  })()}
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      </Card>
+
+      {/* Statistiques */}
+      <Card>
+        <div className="p-6">
+          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 xl:grid-cols-4">
+            <div>
+              <p className="text-sm text-gray-500 dark:text-gray-400">Montant total dû</p>
+              <p className="mt-2 text-2xl font-semibold text-gray-900 dark:text-white">
+                {paiementEleveService.formatMontant(paiementStats.totalDu)}
+              </p>
+            </div>
+            <div>
+              <p className="text-sm text-gray-500 dark:text-gray-400">Montant total payé</p>
+              <p className="mt-2 text-2xl font-semibold text-green-600 dark:text-green-400">
+                {paiementEleveService.formatMontant(paiementStats.totalPaye)}
+              </p>
+            </div>
+            <div>
+              <p className="text-sm text-gray-500 dark:text-gray-400">Montant restant</p>
+              <p className="mt-2 text-2xl font-semibold text-orange-600 dark:text-orange-400">
+                {paiementEleveService.formatMontant(paiementStats.totalRestant)}
+              </p>
+            </div>
+            <div>
+              <p className="text-sm text-gray-500 dark:text-gray-400">Taux de recouvrement</p>
+              <p className="mt-2 text-2xl font-semibold text-gray-900 dark:text-white">
+                {paiementStats.tauxRecouvrement.toFixed(1)}%
+              </p>
+              <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                {paiementStats.regles} réglés • {paiementStats.enRetard} en retard
+              </p>
+            </div>
+          </div>
+        </div>
+      </Card>
+
       {/* Filtres */}
       <Card>
         <div className="p-6">
@@ -574,41 +805,6 @@ const PaiementsElevesIndex: React.FC = () => {
                   )}
                 </select>
               </div>
-            </div>
-          </div>
-        </div>
-      </Card>
-
-      {/* Statistiques */}
-      <Card>
-        <div className="p-6">
-          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 xl:grid-cols-4">
-            <div>
-              <p className="text-sm text-gray-500 dark:text-gray-400">Montant total dû</p>
-              <p className="mt-2 text-2xl font-semibold text-gray-900 dark:text-white">
-                {paiementEleveService.formatMontant(paiementStats.totalDu)}
-              </p>
-            </div>
-            <div>
-              <p className="text-sm text-gray-500 dark:text-gray-400">Montant total payé</p>
-              <p className="mt-2 text-2xl font-semibold text-green-600 dark:text-green-400">
-                {paiementEleveService.formatMontant(paiementStats.totalPaye)}
-              </p>
-            </div>
-            <div>
-              <p className="text-sm text-gray-500 dark:text-gray-400">Montant restant</p>
-              <p className="mt-2 text-2xl font-semibold text-orange-600 dark:text-orange-400">
-                {paiementEleveService.formatMontant(paiementStats.totalRestant)}
-              </p>
-            </div>
-            <div>
-              <p className="text-sm text-gray-500 dark:text-gray-400">Taux de recouvrement</p>
-              <p className="mt-2 text-2xl font-semibold text-gray-900 dark:text-white">
-                {paiementStats.tauxRecouvrement.toFixed(1)}%
-              </p>
-              <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                {paiementStats.regles} réglés • {paiementStats.enRetard} en retard
-              </p>
             </div>
           </div>
         </div>

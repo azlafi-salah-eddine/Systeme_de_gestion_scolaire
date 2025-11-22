@@ -11,6 +11,7 @@ import { useNotification } from '../../contexts/NotificationContext';
 import { useAnneeScolaire } from '../../contexts/AnneeScolaireContext';
 import { useAuth } from '../../contexts/AuthContext';
 import periodService, { type Periode } from '../../services/periodService';
+import niveauService from '../../services/niveauService';
 
 interface Controle {
   id: number;
@@ -52,6 +53,7 @@ interface Eleve {
     niveau?: {
       id: number;
       nom: string;
+      bareme?: number;
     };
   };
 }
@@ -71,6 +73,7 @@ const EleveNotes: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [loadingNotes, setLoadingNotes] = useState(false);
   const [loadingMatieres, setLoadingMatieres] = useState(false);
+  const [bareme, setBareme] = useState<number>(20);
   const [showNoteForm, setShowNoteForm] = useState(false);
   const [selectedControle, setSelectedControle] = useState<Controle | null>(null);
   const [noteForm, setNoteForm] = useState({
@@ -87,6 +90,13 @@ const EleveNotes: React.FC = () => {
       void loadPeriodes();
     }
   }, [eleveId, anneeActive]);
+
+  // Load bareme when eleve is loaded
+  useEffect(() => {
+    if (eleve?.classe?.niveau?.id) {
+      loadBareme(eleve.classe.niveau.id);
+    }
+  }, [eleve]);
 
   // Reload notes and matieres when period changes
   useEffect(() => {
@@ -155,7 +165,8 @@ const EleveNotes: React.FC = () => {
       }
       
       const response = await notesService.getNotes(filters);
-      setNotes(response.data || []);
+      const notesData = (response as any)?.data || response;
+      setNotes(Array.isArray(notesData) ? (notesData as Note[]) : []);
     } catch (error: any) {
       setError('Impossible de charger les notes');
       console.error('Error loading notes:', error);
@@ -240,6 +251,30 @@ const EleveNotes: React.FC = () => {
 
   const getClasseName = (eleve: Eleve) => {
     return `Classe : ${eleve.classe?.nom || 'Non définie'}`;
+  };
+
+  const loadBareme = async (niveauId: number) => {
+    try {
+      const response = await niveauService.getNiveau(niveauId);
+      if (response.data?.bareme !== undefined) {
+        const baremeValue = typeof response.data.bareme === 'number'
+          ? response.data.bareme
+          : parseFloat(String(response.data.bareme || 20));
+        setBareme(baremeValue);
+      }
+    } catch (error) {
+      console.error('Error loading bareme:', error);
+      setBareme(20); // Default value
+    }
+  };
+
+  // Format bareme to remove unnecessary .00
+  const formatBareme = (value: number): string => {
+    const rounded = Math.round(value * 100) / 100;
+    if (Math.abs(rounded % 1) < 0.001) {
+      return Math.round(rounded).toString();
+    }
+    return parseFloat(rounded.toFixed(2)).toString();
   };
 
 
@@ -375,134 +410,203 @@ const EleveNotes: React.FC = () => {
           </div>
         </Card>
       ) : matieres.length > 0 ? (
-      <Card>
-          <div className="p-6">
-            <h3 className="mb-4 text-lg font-semibold text-gray-900 dark:text-white">
-              Tableau des matières et notes
-              </h3>
-            <div className="space-y-6">
-              {matieres.map((matiere) => {
-                const matiereNotes = notes.filter(note => 
-                  matiere.controles.some(controle => controle.id === note.controle_id)
-                );
-                const moyenne = matiereNotes.length > 0 
-                  ? (matiereNotes.reduce((sum, note) => sum + note.note, 0) / matiereNotes.length).toFixed(2)
-                  : '—';
-    
-                return (
-                  <div key={matiere.id} className="space-y-4">
-                    {/* Titre de la matière - AU-DESSUS du tableau */}
-                    <div className="p-4 rounded-lg bg-blue-50 dark:bg-blue-900/20">
-                      <div className="flex items-center">
-                        <div className="flex items-center justify-center w-10 h-10 mr-4 bg-blue-100 rounded-full dark:bg-blue-900/30">
-                          <Icon name="book" className="text-blue-600 dark:text-blue-400" size="sm" />
-                        </div>
-                        <div>
-                          <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-                            {matiere.nom}
-                          </h3>
-                          {matiere.code && (
-                            <p className="text-sm text-gray-600 dark:text-gray-400">
-                              Code: {matiere.code}
-                            </p>
-                          )}
-                        </div>
-                        <div className="ml-auto">
-                          <span className="inline-flex items-center px-3 py-1 text-sm font-medium text-blue-800 bg-blue-100 rounded-full dark:bg-blue-900/30 dark:text-blue-200">
-                            Moyenne: {moyenne}
-                          </span>
-                        </div>
+        <div className="space-y-6">
+          {matieres.map((matiere) => {
+            const matiereNotes = notes.filter(note => 
+              matiere.controles.some(controle => controle.id === note.controle_id)
+            );
+            
+            // Calculer moyenne avec le barème correct
+            const notesAvecBareme = matiereNotes.map(note => {
+              const noteBareme = note.bareme || bareme;
+              const noteValue = Number(note.note);
+              return (noteValue / noteBareme) * bareme;
+            });
+            
+            const moyenneValue = notesAvecBareme.length > 0 
+              ? notesAvecBareme.reduce((sum, note) => sum + note, 0) / notesAvecBareme.length
+              : 0;
+            
+            const moyenne = notesAvecBareme.length > 0 
+              ? parseFloat(moyenneValue.toFixed(2)).toString()
+              : '—';
+
+            return (
+              <Card key={matiere.id}>
+                <div className="p-6">
+                  {/* En-tête de la matière */}
+                  <div className="flex items-center justify-between pb-4 mb-6 border-b border-gray-200 dark:border-gray-700">
+                    <div className="flex items-center">
+                      <div className="flex items-center justify-center w-12 h-12 mr-4 rounded-lg bg-gradient-to-br from-blue-500 to-blue-600">
+                        <Icon name="book" className="text-white" size="lg" />
+                      </div>
+                      <div>
+                        <h3 className="text-xl font-bold text-gray-900 dark:text-white">
+                          {matiere.nom}
+                        </h3>
+                        {matiere.code && (
+                          <p className="text-sm text-gray-500 dark:text-gray-400">
+                            Code: {matiere.code}
+                          </p>
+                        )}
                       </div>
                     </div>
-                    
-                    {/* Tableau des devoirs pour cette matière */}
-                    <div className="overflow-x-auto">
+                    <div className="text-right">
+                      <div className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                        Moyenne
+                      </div>
+                      <div className="flex items-baseline">
+                        <span className="text-3xl font-bold text-blue-600 dark:text-blue-400">
+                          {moyenne}
+                        </span>
+                        <span className="ml-1 text-lg text-gray-500 dark:text-gray-400">
+                          /{formatBareme(bareme)}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  {/* Tableau des notes */}
+                  {matiere.controles.length > 0 ? (
+                    <div className="overflow-hidden border border-gray-200 rounded-lg dark:border-gray-700">
                       <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
                         <thead className="bg-gray-50 dark:bg-gray-800">
                           <tr>
-                            <th className="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase dark:text-gray-300">
-                              Devoir
+                            <th className="px-6 py-4 text-xs font-semibold tracking-wider text-left text-gray-700 uppercase dark:text-gray-300">
+                              Contrôle
                             </th>
-                            <th className="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase dark:text-gray-300">
-                              Type
+                            <th className="px-6 py-4 text-xs font-semibold tracking-wider text-center text-gray-700 uppercase dark:text-gray-300">
+                              Date
                             </th>
-                            <th className="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase dark:text-gray-300">
+                            <th className="px-6 py-4 text-xs font-semibold tracking-wider text-center text-gray-700 uppercase dark:text-gray-300">
                               Note
+                            </th>
+                            <th className="px-6 py-4 text-xs font-semibold tracking-wider text-center text-gray-700 uppercase dark:text-gray-300">
+                              Appréciation
                             </th>
                           </tr>
                         </thead>
                         <tbody className="bg-white divide-y divide-gray-200 dark:bg-gray-900 dark:divide-gray-700">
-                          {matiere.controles.length > 0 ? (
-                            matiere.controles.map((controle) => {
-                              const note = matiereNotes.find(n => n.controle_id === controle.id);
-                              const percentage = note ? (note.note / note.bareme) * 100 : 0;
-                              const getNoteColor = () => {
-                                if (percentage >= 80) return 'text-green-800 dark:text-green-200 bg-green-100 dark:bg-green-900/30';
-                                if (percentage >= 60) return 'text-yellow-800 dark:text-yellow-200 bg-yellow-100 dark:bg-yellow-900/30';
-                                return 'text-red-800 dark:text-red-200 bg-red-100 dark:bg-red-900/30';
-                              };
-                              
-                              return (
-                                <tr key={controle.id} className="hover:bg-gray-50 dark:hover:bg-gray-800">
-                                  <td className="px-6 py-4 whitespace-nowrap">
-                                    <div className="flex items-center">
-                                      <div className="flex items-center justify-center w-8 h-8 mr-3 bg-gray-100 rounded-full dark:bg-gray-800">
-                                        <Icon name="file-text" className="text-gray-600 dark:text-gray-400" size="sm" />
-                                      </div>
-                                      <div>
-                                        <div className="text-sm font-medium text-gray-900 dark:text-white">
-                                          {controle.libelle}
-                                        </div>
-                                        <div className="text-sm text-gray-500 dark:text-gray-400">
-                                          {controle.debut_controle && new Date(controle.debut_controle).toLocaleDateString('fr-FR')}
-                                        </div>
-                                      </div>
+                          {matiere.controles.map((controle) => {
+                            const note = matiereNotes.find(n => n.controle_id === controle.id);
+                            const noteBareme = note?.bareme || bareme;
+                            const noteValue = note ? Number(note.note) : 0;
+                            const percentage = note ? (noteValue / noteBareme) * 100 : 0;
+                            
+                            const getAppreciation = () => {
+                              if (!note) return { text: '—', color: 'text-gray-400' };
+                              if (percentage >= 90) return { text: 'Excellent', color: 'text-green-600 dark:text-green-400' };
+                              if (percentage >= 80) return { text: 'Très bien', color: 'text-green-600 dark:text-green-400' };
+                              if (percentage >= 70) return { text: 'Bien', color: 'text-blue-600 dark:text-blue-400' };
+                              if (percentage >= 60) return { text: 'Assez bien', color: 'text-yellow-600 dark:text-yellow-400' };
+                              if (percentage >= 50) return { text: 'Passable', color: 'text-orange-600 dark:text-orange-400' };
+                              return { text: 'Insuffisant', color: 'text-red-600 dark:text-red-400' };
+                            };
+
+                            const getNoteColor = () => {
+                              if (!note) return 'bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400';
+                              if (percentage >= 80) return 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-200 border-green-200 dark:border-green-800';
+                              if (percentage >= 60) return 'bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-200 border-blue-200 dark:border-blue-800';
+                              if (percentage >= 50) return 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-200 border-yellow-200 dark:border-yellow-800';
+                              return 'bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-200 border-red-200 dark:border-red-800';
+                            };
+
+                            const appreciation = getAppreciation();
+                            
+                            return (
+                              <tr key={controle.id} className="transition-colors hover:bg-gray-50 dark:hover:bg-gray-800/50">
+                                <td className="px-6 py-4">
+                                  <div className="flex items-start">
+                                    <div className="flex items-center justify-center flex-shrink-0 w-10 h-10 mr-3 rounded-lg bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-800">
+                                      <Icon name="file-text" className="text-gray-600 dark:text-gray-300" size="sm" />
                                     </div>
-                                  </td>
-                                  
-                                  <td className="px-6 py-4 whitespace-nowrap">
-                                    <div className="text-sm text-gray-900 dark:text-white">
-                                      Devoir
+                                    <div className="min-w-0 flex-1">
+                                      <div className="text-sm font-semibold text-gray-900 dark:text-white">
+                                        {controle.libelle}
+                                      </div>
+                                      {controle.instructions && (
+                                        <div className="mt-1 text-xs text-gray-500 dark:text-gray-400 line-clamp-1">
+                                          {controle.instructions}
+                                        </div>
+                                      )}
                                     </div>
-                                  </td>
-                                  
-                                  <td className="px-6 py-4 whitespace-nowrap">
+                                  </div>
+                                </td>
+                                
+                                <td className="px-6 py-4 text-center">
+                                  {controle.debut_controle && (
+                                    <div className="inline-flex items-center px-3 py-1 text-xs font-medium text-gray-700 bg-gray-100 rounded-full dark:bg-gray-800 dark:text-gray-300">
+                                      <Icon name="calendar" size="sm" className="mr-1.5" />
+                                      {new Date(controle.debut_controle).toLocaleDateString('fr-FR', { 
+                                        day: 'numeric', 
+                                        month: 'short'
+                                      })}
+                                    </div>
+                                  )}
+                                </td>
+                                
+                                <td className="px-6 py-4">
+                                  <div className="flex justify-center">
                                     {note ? (
-                                      <span className={`inline-flex items-center px-3 py-1 text-sm font-medium rounded-full ${getNoteColor()}`}>
-                                        {note.note}/{note.bareme}
-                                      </span>
+                                      <div className={`inline-flex items-center px-4 py-2 text-base font-bold border-2 rounded-lg ${getNoteColor()}`}>
+                                        <span className="text-lg">{parseFloat(Number(note.note).toFixed(2))}</span>
+                                        <span className="mx-1 text-sm opacity-75">/</span>
+                                        <span className="text-sm">{formatBareme(noteBareme)}</span>
+                                      </div>
                                     ) : (
-                                      <span className="text-sm italic text-gray-400 dark:text-gray-500">Note non saisie</span>
+                                      <span className="inline-flex items-center px-4 py-2 text-sm italic text-gray-400 bg-gray-100 rounded-lg dark:text-gray-500 dark:bg-gray-800">
+                                        <Icon name="minus" size="sm" className="mr-1.5" />
+                                        Non évalué
+                                      </span>
                                     )}
-                                  </td>
-                                </tr>
-                              );
-                            })
-                          ) : (
-                            <tr>
-                              <td colSpan={3} className="px-6 py-8 text-center text-gray-500 dark:text-gray-400">
-                                <Icon name="file-text" size="lg" className="mx-auto mb-2 text-gray-300 dark:text-gray-600" />
-                                <p>Aucun devoir disponible pour cette matière</p>
-                              </td>
-                            </tr>
-                          )}
+                                  </div>
+                                </td>
+                                
+                                <td className="px-6 py-4 text-center">
+                                  <span className={`inline-flex items-center text-sm font-semibold ${appreciation.color}`}>
+                                    {note && percentage >= 80 && <Icon name="star" size="sm" className="mr-1.5" />}
+                                    {appreciation.text}
+                                  </span>
+                                </td>
+                              </tr>
+                            );
+                          })}
                         </tbody>
                       </table>
                     </div>
-                  </div>
-                );
-              })}
+                  ) : (
+                    <div className="py-12 text-center">
+                      <div className="flex items-center justify-center w-16 h-16 mx-auto mb-4 bg-gray-100 rounded-full dark:bg-gray-800">
+                        <Icon name="file-text" size="lg" className="text-gray-400 dark:text-gray-600" />
+                      </div>
+                      <p className="text-sm font-medium text-gray-900 dark:text-white">
+                        Aucun contrôle disponible
+                      </p>
+                      <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                        Aucun devoir n'a été programmé pour cette matière
+                      </p>
+                    </div>
+                  )}
+                </div>
+              </Card>
+            );
+          })}
+        </div>
+      ) : (
+        <Card>
+          <div className="p-12 text-center">
+            <div className="flex items-center justify-center w-20 h-20 mx-auto mb-4 bg-gray-100 rounded-full dark:bg-gray-800">
+              <Icon name="book" size="lg" className="text-gray-400 dark:text-gray-600" />
             </div>
-              </div>
-            </Card>
-        ) : (
-          <Card>
-            <div className="p-6 text-center">
-              <Icon name="file-text" size="lg" className="mx-auto mb-4 text-gray-300 dark:text-gray-600" />
-              <p className="text-gray-500 dark:text-gray-400">Aucune matière avec contrôles disponible</p>
-            </div>
-          </Card>
-        )}
+            <h3 className="mb-2 text-lg font-semibold text-gray-900 dark:text-white">
+              Aucune matière disponible
+            </h3>
+            <p className="text-sm text-gray-500 dark:text-gray-400">
+              Aucune matière avec contrôles n'est disponible pour le moment
+            </p>
+          </div>
+        </Card>
+      )}
 
 
       {/* Formulaire d'ajout de note - Seulement pour admin/prof */}

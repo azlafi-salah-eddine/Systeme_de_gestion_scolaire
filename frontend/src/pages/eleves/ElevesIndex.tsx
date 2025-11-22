@@ -6,7 +6,7 @@ import Button from '../../components/ui/Button';
 import Icon from '../../components/Icon';
 import StudentPhoto from '../../components/ui/StudentPhoto';
 import ConfirmationModal from '../../components/ui/ConfirmationModal';
-import type { Eleve } from '../../types/eleve';
+import type { Eleve, EleveListResponse } from '../../types/eleve';
 import { eleveService } from '../../services/eleveService';
 import { useAuth } from '../../contexts/AuthContext';
 import { useNotification } from '../../contexts/NotificationContext';
@@ -229,7 +229,7 @@ const ElevesIndex: React.FC = () => {
           }
         }
         
-        const response = await eleveService.getEleves(params);
+        const response = await eleveService.getEleves(params) as EleveListResponse;
         if (response.success) {
         setEleves(response.data);
           setTotal(response.pagination.total);

@@ -31,7 +31,8 @@ const NoteForm: React.FC<NoteFormProps> = ({
 
   const [formData, setFormData] = useState<CreateNoteData>({
     eleve_id: note?.eleve_id || (urlEleveId ? parseInt(urlEleveId) : 0),
-    discipline_id: note?.discipline_id || (urlDisciplineId ? parseInt(urlDisciplineId) : 0),
+    matiere_id: note?.matiere_id || 0,
+    discipline_id: note?.discipline_id || (urlDisciplineId ? parseInt(urlDisciplineId) : undefined),
     controle_id: note?.controle_id || (urlControleId ? parseInt(urlControleId) : undefined),
     professeur_id: note?.professeur_id || (urlProfesseurId ? parseInt(urlProfesseurId) : 0),
     note: note?.note || 0,

@@ -26,6 +26,7 @@ interface Controle {
   matiere?: {
     id: number;
     nom: string;
+    niveau?: { id: number; nom: string } | string;
   };
   professeur?: {
     id: number;
@@ -324,7 +325,11 @@ const ControlesIndex: React.FC = () => {
                         </div>
                       </td>
                       <td className="px-3 py-2 text-slate-600 dark:text-gray-400">
-                        {controle.matiere?.niveau?.nom || '—'}
+                        {(() => {
+                          const niveau = controle.matiere?.niveau;
+                          if (!niveau) return '—';
+                          return typeof niveau === 'string' ? niveau : (niveau.nom || '—');
+                        })()}
                       </td>
                       <td className="px-3 py-2 text-slate-600 dark:text-gray-400">
                         {controle.matiere?.nom || '—'}

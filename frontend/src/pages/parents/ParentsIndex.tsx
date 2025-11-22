@@ -28,7 +28,8 @@ const ParentsIndex: React.FC = () => {
       const res = await parentService.list({ 
         per_page: 1000, 
         q: query || '',
-        active: showDeleted ? false : true
+        // backend expects maybe 'withDeleted' or similar; remove unsupported 'active' flag
+        ...(showDeleted ? { deleted: true } : {})
       });
       const data = (res as any).data || (res as any).parents || [];
       setItems(data);

@@ -15,17 +15,14 @@ import { useNotification } from '../../contexts/NotificationContext';
 interface Classe {
   id: number;
   nom: string;
-  niveau?: {
-    id: number;
-    nom: string;
-  };
+  niveau?: { id: number; nom: string } | string;
 }
 
 interface Eleve {
   id: number;
-  nom_fr: string;
-  prenom_fr: string;
-  nom_complet: string;
+  nom_fr?: string;
+  prenom_fr?: string;
+  nom_complet?: string;
 }
 
 
@@ -118,7 +115,7 @@ const NotesNew: React.FC = () => {
       
       // Load niveaux
       const niveauxRes = await niveauService.list();
-      setNiveaux(niveauxRes.data || []);
+      setNiveaux(Array.isArray(niveauxRes) ? niveauxRes : (niveauxRes as any)?.data || []);
       
       
       // Load matieres
@@ -127,7 +124,7 @@ const NotesNew: React.FC = () => {
       
       // Load professeurs
       const professeursRes = await professeurService.list({ per_page: 1000 });
-      setProfesseurs(professeursRes.data || []);
+      setProfesseurs((professeursRes as any).data || professeursRes || []);
       
     } catch (error) {
       showError('Erreur', 'Impossible de charger les données initiales');
@@ -141,7 +138,7 @@ const NotesNew: React.FC = () => {
     try {
       const response = await classeService.index({ 
         per_page: 1000, 
-        niveau_id: niveauId.toString(),
+          niveau: niveauId.toString(),
         active: true 
       });
       setClasses(response.data || []);
@@ -310,7 +307,7 @@ const NotesNew: React.FC = () => {
                       </div>
                       {classe.niveau && (
                         <div className="text-sm text-gray-500 dark:text-gray-400">
-                          {classe.niveau.nom}
+                          {typeof classe.niveau === 'string' ? classe.niveau : (classe.niveau?.nom || '')}
                         </div>
                       )}
                     </button>

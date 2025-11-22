@@ -70,7 +70,13 @@ export interface Eleve {
   id: number;
   nom: string;
   prenom: string;
+  nom_fr?: string;
+  prenom_fr?: string;
+  nom_complet?: string;
   date_naissance: string;
+  matricule?: string;
+  cne?: string;
+  sexe?: string;
   classe_id?: number;
   parent_id?: number;
   created_at: string;

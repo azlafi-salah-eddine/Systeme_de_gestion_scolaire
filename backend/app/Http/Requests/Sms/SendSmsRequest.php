@@ -22,9 +22,11 @@ class SendSmsRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'destinataire_type' => 'required|string|in:eleve,parent',
-            'destinataire_id' => 'required|integer',
-            'message' => 'required|string|max:160',
+            'destinataire_type' => 'required|string|in:eleve,parent,classe,niveau,tous,personnalise',
+            'destinataire_id' => 'nullable|integer',
+            'message' => 'required|string|max:1000',
+            'numeros_personnalises' => 'nullable|array',
+            'numeros_personnalises.*' => 'string',
         ];
     }
 }

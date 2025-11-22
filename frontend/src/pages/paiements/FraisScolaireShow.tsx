@@ -30,7 +30,7 @@ const FraisScolaireShow: React.FC = () => {
         setFrais(response.data);
       }
     } catch (error: any) {
-      showError('Erreur lors du chargement du frais scolaire');
+      showError('Erreur', 'Erreur lors du chargement du frais scolaire');
     } finally {
       setLoading(false);
     }
@@ -119,7 +119,7 @@ const FraisScolaireShow: React.FC = () => {
             <div>
               <dt className="text-sm font-medium text-gray-500 dark:text-gray-400">Date de création</dt>
               <dd className="mt-1 text-sm text-gray-900 dark:text-white">
-                {new Date(frais.created_at).toLocaleDateString('fr-FR')}
+                {frais.created_at ? new Date(frais.created_at).toLocaleDateString('fr-FR') : '—'}
               </dd>
             </div>
           </dl>

@@ -25,8 +25,8 @@ interface AnneeScolaireContextType {
   refreshAnneeActive: () => Promise<void>;
   refreshAnneesScolaires: () => Promise<void>;
   activerAnneeScolaire: (id: number) => Promise<boolean>;
-  createAnneeScolaire: (data: { annee_debut: number; annee_fin: number }) => Promise<boolean>;
-  updateAnneeScolaire: (id: number, data: { annee_debut: number; annee_fin: number }) => Promise<boolean>;
+  createAnneeScolaire: (data: { nom: string; date_debut: string; date_fin: string; description?: string }) => Promise<boolean>;
+  updateAnneeScolaire: (id: number, data: { nom: string; date_debut: string; date_fin: string; description?: string }) => Promise<boolean>;
   deleteAnneeScolaire: (id: number) => Promise<boolean>;
 }
 
@@ -44,9 +44,9 @@ export const AnneeScolaireProvider: React.FC<AnneeScolaireProviderProps> = ({ ch
   const { isAuthenticated, isLoading: isAuthLoading } = useAuth();
   
   // Safely get notification functions with fallback
-  let showSuccess = () => {};
-  let showError = () => {};
-  let showWarning = () => {};
+  let showSuccess = (_title: string, _message: string) => {};
+  let showError = (_title: string, _message: string) => {};
+  let showWarning = (_title: string, _message: string) => {};
   
   try {
     const notificationContext = useNotification();

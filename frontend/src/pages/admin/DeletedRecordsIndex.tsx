@@ -129,7 +129,6 @@ const LABEL_MAP: Record<string, string> = {
   matiere: 'Matière',
   eleve_nom: 'Élève',
   professeur_nom: 'Professeur',
-  matiere_nom: 'Matière',
   motif: 'Motif',
   type: 'Type',
   adresse: 'Adresse',
@@ -159,15 +158,15 @@ const LABEL_MAP: Record<string, string> = {
   classe_nom: 'Classe',
   sessions: 'Séances',
   // Activités
-  description: 'Description',
-  type: 'Type',
-  capacite: 'Capacité',
+  activity_description: 'Description',
+  activity_type: 'Type',
+  activity_capacite: 'Capacité',
   lieu: 'Lieu',
   prix: 'Prix',
-  date_debut: 'Date début',
-  date_fin: 'Date fin',
-  heure_debut: 'Heure début',
-  heure_fin: 'Heure fin',
+  activity_date_debut: 'Date début',
+  activity_date_fin: 'Date fin',
+  activity_heure_debut: 'Heure début',
+  activity_heure_fin: 'Heure fin',
   responsable_id: 'Responsable',
   responsable_nom: 'Responsable',
 };
@@ -217,7 +216,7 @@ const DeletedRecordsIndex: React.FC = () => {
     } catch (error: any) {
       // Ne pas afficher d'erreur pour les 401 - l'interceptor gère la redirection
       if (error?.response?.status !== 401) {
-        showError('Erreur lors du chargement des données');
+        showError('Erreur', 'Erreur lors du chargement des données');
       }
     } finally {
       setLoading(false);
@@ -241,7 +240,7 @@ const DeletedRecordsIndex: React.FC = () => {
       setDetails(data);
       setDetailsOpen(true);
     } catch (e) {
-      showError('Erreur lors du chargement des détails');
+      showError('Erreur', 'Erreur lors du chargement des détails');
     }
   };
 

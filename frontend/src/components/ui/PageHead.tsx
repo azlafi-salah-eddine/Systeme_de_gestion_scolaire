@@ -5,7 +5,7 @@ import Icon from '../Icon';
 
 interface BreadcrumbItem {
   label: string;
-  link: string;
+  link?: string;
 }
 
 interface ActionItem {
@@ -14,6 +14,7 @@ interface ActionItem {
   onClick?: () => void;
   variant?: 'primary' | 'secondary' | 'outline' | 'ghost' | 'danger';
   icon?: string;
+  hidden?: boolean;
 }
 
 interface PageHeadProps {
@@ -42,7 +43,7 @@ const PageHead: React.FC<PageHeadProps> = ({
                 {index > 0 && (
                   <Icon name="chevron-right" size="sm" className="text-gray-400 dark:text-gray-500 mx-1" />
                 )}
-                {index === breadcrumb.length - 1 ? (
+                {index === breadcrumb.length - 1 || !item.link ? (
                   <span className="text-sm font-medium text-gray-500 dark:text-gray-400">
                     {item.label}
                   </span>
@@ -77,7 +78,7 @@ const PageHead: React.FC<PageHeadProps> = ({
         {actions && actions.length > 0 && (
           <div className="mt-4 sm:mt-0 sm:ml-4">
             <div className="flex flex-col sm:flex-row gap-2">
-              {actions.map((action, index) => (
+              {actions.filter(action => !action.hidden).map((action, index) => (
                 <div key={index}>
                   {action.link ? (
                     <Link to={action.link}>

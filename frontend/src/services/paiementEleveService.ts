@@ -1,6 +1,5 @@
 import type { 
-  PaiementEleve, 
-  HistoriquePaiement, 
+  PaiementEleve,
   PaiementEleveFormData, 
   PaiementEleveResponse, 
   PaiementsEleveResponse, 
@@ -20,6 +19,7 @@ class PaiementEleveService {
     niveau_id?: number;
     niveau?: string;
     frais_scolaire_id?: number;
+    annee_scolaire_id?: number;
     search?: string;
     per_page?: number;
     page?: number;

@@ -7,7 +7,13 @@ interface CardProps {
   children: React.ReactNode;
 }
 
-const Card: React.FC<CardProps> = ({ className, variant, children, ...props }) => {
+type CardComponent = React.FC<CardProps> & {
+  Body: React.FC<BodyProps>;
+  Header: React.FC<HeaderProps>;
+  Footer: React.FC<FooterProps>;
+};
+
+const Card: CardComponent = ({ className, variant, children, ...props }) => {
   const wrapperClass = classNames({
     "border rounded-md": true,
     "bg-white dark:bg-gray-950 border-gray-300 dark:border-gray-900": !variant,
@@ -85,8 +91,8 @@ const Footer: React.FC<FooterProps> = ({ className, variant, children, ...props 
   )
 }
 
-Card.Body = Body;
-Card.Header = Header;
-Card.Footer = Footer;
+Card.Body = Body as React.FC<BodyProps>;
+Card.Header = Header as React.FC<HeaderProps>;
+Card.Footer = Footer as React.FC<FooterProps>;
 
 export default Card;

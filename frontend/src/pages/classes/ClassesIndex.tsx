@@ -214,7 +214,7 @@ const ClassesIndex: React.FC = () => {
       doc.setFontSize(9);
       doc.setFont('helvetica', 'bold');
       // Ligne du haut: Niveau (gauche), Classe (centre), Date (droite)
-      doc.text(niveauInfo, 20, yPosition);
+      doc.text(String(niveauInfo || ''), 20, yPosition);
       doc.text(classInfo, pageWidth / 2, yPosition, { align: 'center' });
       doc.text(dateInfo, pageWidth - 20, yPosition, { align: 'right' });
       yPosition += 20;
@@ -419,7 +419,7 @@ const ClassesIndex: React.FC = () => {
                     const q = filters.search.trim().toLowerCase();
                     const filtered = q ? classes.filter((classe: Classe) =>
                       (classe.nom || '').toLowerCase().includes(q) ||
-                      (typeof classe.niveau === 'object' && classe.niveau ? classe.niveau.nom : classe.niveau || '').toLowerCase().includes(q) ||
+                      (typeof classe.niveau === 'object' && classe.niveau ? classe.niveau.nom : String(classe.niveau || '')).toLowerCase().includes(q) ||
                       (classe.section || '').toLowerCase().includes(q) ||
                       (classe.nom_complet || '').toLowerCase().includes(q)
                     ) : classes;
@@ -458,7 +458,7 @@ const ClassesIndex: React.FC = () => {
                         
                         return (
                           <span className="inline-flex items-center rounded-full bg-blue-100 dark:bg-blue-900/30 px-2 py-0.5 text-xs font-medium text-blue-800 dark:text-blue-200">
-                            {niveauNom}
+                            {typeof niveauNom === 'object' ? String(niveauNom) : niveauNom}
                           </span>
                         );
                       })()}</td>
@@ -504,7 +504,7 @@ const ClassesIndex: React.FC = () => {
                     const q = filters.search.trim().toLowerCase();
                     const filtered = q ? classes.filter((classe: Classe) =>
                       (classe.nom || '').toLowerCase().includes(q) ||
-                      (typeof classe.niveau === 'object' && classe.niveau ? classe.niveau.nom : classe.niveau || '').toLowerCase().includes(q) ||
+                      (typeof classe.niveau === 'object' && classe.niveau ? classe.niveau.nom : String(classe.niveau || '')).toLowerCase().includes(q) ||
                       (classe.section || '').toLowerCase().includes(q) ||
                       (classe.nom_complet || '').toLowerCase().includes(q)
                     ) : classes;
@@ -520,7 +520,7 @@ const ClassesIndex: React.FC = () => {
                 const q = filters.search.trim().toLowerCase();
                 const filtered = q ? classes.filter((classe: Classe) =>
                   (classe.nom || '').toLowerCase().includes(q) ||
-                  (typeof classe.niveau === 'object' && classe.niveau ? classe.niveau.nom : classe.niveau || '').toLowerCase().includes(q) ||
+                  (typeof classe.niveau === 'object' && classe.niveau ? String(classe.niveau.nom) : String(classe.niveau || '')).toLowerCase().includes(q) ||
                   (classe.section || '').toLowerCase().includes(q) ||
                   (classe.nom_complet || '').toLowerCase().includes(q)
                 ) : classes;

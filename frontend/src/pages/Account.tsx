@@ -68,6 +68,7 @@ const Account: React.FC = () => {
       const response = await accountService.updateProfile({
         nom: profileForm.nom,
         prenom: profileForm.prenom,
+        email: profile?.email || profileForm.email,
         telephone: profileForm.telephone || undefined
       });
       

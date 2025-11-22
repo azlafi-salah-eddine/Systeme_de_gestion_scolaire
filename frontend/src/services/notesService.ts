@@ -4,6 +4,8 @@ export interface Note {
   id: number;
   eleve_id: number;
   matiere_id: number;
+  discipline_id?: number;
+  periode_id?: number;
   controle_id?: number;
   professeur_id: number;
   note: number;
@@ -24,6 +26,15 @@ export interface Note {
     nom: string;
     code: string;
     coefficient: number;
+  };
+  discipline?: {
+    id: number;
+    nom: string;
+    code: string;
+  };
+  periode?: {
+    id: number;
+    nom: string;
   };
   controle?: {
     id: number;
@@ -51,6 +62,7 @@ export interface NoteFilters {
   classe_id?: number;
   professeur_id?: number;
   matiere_id?: number;
+  discipline_id?: number;
   eleve_id?: number;
   annee_scolaire_id?: number;
   periode_id?: number;
@@ -74,6 +86,7 @@ export interface NoteStatistics {
 export interface CreateNoteData {
   eleve_id: number;
   matiere_id: number;
+  discipline_id?: number;
   controle_id?: number;
   professeur_id: number;
   note: number;

@@ -277,8 +277,8 @@ Route::apiResource('notes', NoteController::class);
 
         // 6. Notifications SMS (Admin uniquement)
         Route::middleware(['admin.only'])->group(function () {
-            Route::post('/sms/send', [SmsController::class, 'send']);
-            Route::get('/sms/history', [SmsController::class, 'history']);
+            Route::post('/sms/send', [SmsController::class, 'send'])->middleware('clean.json');
+            Route::get('/sms/history', [SmsController::class, 'history'])->middleware('clean.json');
         });
 
     });

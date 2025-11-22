@@ -316,7 +316,11 @@ const EleveDetails: React.FC<EleveDetailsProps> = ({ eleve, onEdit, onDelete }) 
                 Niveau
                         </span>
               <span className="text-sm/6 text-slate-600 group-hover:text-slate-700 dark:text-white group-hover:dark:text-slate-200 transition-all duration-300 block md:w-1/2">
-                {eleve.classe?.niveau || 'Niveau non défini'}
+                {(() => {
+                  const niveau = eleve.classe?.niveau;
+                  if (!niveau) return 'Niveau non défini';
+                  return typeof niveau === 'string' ? (niveau || 'Niveau non défini') : (niveau.nom || 'Niveau non défini');
+                })()}
                         </span>
             </div>
             </div>

@@ -8,6 +8,8 @@ export interface FraisScolaire {
   annee_scolaire_id: number;
   obligatoire: boolean;
   active: boolean;
+  created_at?: string;
+  updated_at?: string;
   niveau?: {
     id: number;
     nom: string;

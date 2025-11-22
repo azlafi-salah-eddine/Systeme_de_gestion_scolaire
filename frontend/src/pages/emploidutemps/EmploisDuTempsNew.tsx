@@ -533,7 +533,7 @@ const EmploisDuTempsNew: React.FC = () => {
             )}
             {matieres.length > 0 && (
               <p className="mt-1 text-xs text-blue-600 dark:text-blue-400">
-                Matières du niveau: {classe?.niveau?.nom || 'Niveau non défini'}
+                Matières du niveau: {(typeof classe?.niveau === 'object' && classe?.niveau?.nom) ? classe.niveau.nom : 'Niveau non défini'}
               </p>
             )}
           </div>

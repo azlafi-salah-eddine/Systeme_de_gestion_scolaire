@@ -17,8 +17,6 @@ import type {
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api';
 
 class EleveService {
-  private isBackendAvailable = true;
-
   // Check if backend is available
   async checkBackendHealth(): Promise<boolean> {
     try {
@@ -29,10 +27,8 @@ class EleveService {
         },
         credentials: 'include',
       });
-      this.isBackendAvailable = response.ok;
       return response.ok;
     } catch (error) {
-      this.isBackendAvailable = false;
       return false;
     }
   }
@@ -268,7 +264,7 @@ class EleveService {
     // Import dynamique pour éviter les dépendances circulaires
     const { classeService } = await import('./classeService');
     const response = await classeService.index();
-    return { data: response.data };
+    return { data: response.data as unknown as Classe[] };
   }
 
   async assignEleveToClasse(classeId: number, eleveId: number): Promise<{ success: boolean; message: string; }>{

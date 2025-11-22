@@ -6,12 +6,24 @@ use Illuminate\Database\Eloquent\Model;
 
 class SmsNotification extends Model
 {
-    protected $table = 'sms';
+    protected $table = 'sms_notifications';
 
     protected $fillable = [
         'destinataire_type',
         'destinataire_id',
+        'telephone',
         'message',
-        'date',
+        'statut',
+        'date_envoi',
+        'type',
+        'urgent',
+        'numeros_personnalises',
+    ];
+
+    protected $casts = [
+        'date_envoi' => 'datetime',
+        'date_livraison' => 'datetime',
+        'urgent' => 'boolean',
+        'active' => 'boolean',
     ];
 }

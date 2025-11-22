@@ -227,7 +227,7 @@ const EmploisDuTempsIndex: React.FC = () => {
 
   const handlePrintAll = () => {
     try {
-      printTimetable('all-timetables-content');
+      exportTimetable('all-timetables-content', { filename: 'tous-les-emplois', format: 'pdf' });
     } catch (error) {
       setError('Erreur lors de l\'impression');
     }
@@ -407,7 +407,7 @@ const EmploisDuTempsIndex: React.FC = () => {
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap">
                             <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-200">
-                              {typeof classe.niveau === 'object' && classe.niveau ? classe.niveau.nom : classe.niveau}
+                              {typeof classe.niveau === 'object' && classe.niveau ? classe.niveau.nom : String(classe.niveau || '')}
                             </span>
                           </td>
                           <td className="px-6 py-4 text-sm whitespace-nowrap text-slate-500 dark:text-gray-400">

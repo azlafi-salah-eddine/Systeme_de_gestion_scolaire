@@ -160,10 +160,10 @@ const ControleEdit: React.FC = () => {
         );
         setMatieres(filteredMatieres);
         // Reset matiere selection when niveau changes
-        setFormData(prev => ({ ...prev, matiere_id: '' }));
+        setFormData(prev => ({ ...prev, matiere_id: 0 }));
       } else {
         setMatieres([]);
-        setFormData(prev => ({ ...prev, matiere_id: '' }));
+        setFormData(prev => ({ ...prev, matiere_id: 0 }));
       }
     } else {
       setFormData(prev => ({ ...prev, [field]: value }));

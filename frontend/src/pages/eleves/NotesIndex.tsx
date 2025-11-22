@@ -18,6 +18,7 @@ interface Eleve {
   classe?: {
     id: number;
     nom: string;
+    niveau?: any; // broadened for union compatibility
   };
 }
 
@@ -113,7 +114,7 @@ const NotesIndex: React.FC = () => {
         );
       }
       
-      setClasses(allClasses);
+      setClasses(allClasses as any);
       
       // Si le niveau change et qu'une classe était sélectionnée, la réinitialiser
       if (filters.niveau && filters.classe) {
@@ -381,11 +382,11 @@ const NotesIndex: React.FC = () => {
                       </td>
                       {/* Matricule */}
                       <td className="px-4 py-3 text-slate-600">
-                        {eleve.matricule || '—'}
+                        {(eleve as any).matricule || '—'}
                       </td>
                       {/* CNE */}
                       <td className="px-4 py-3 text-slate-600">
-                        {eleve.cne || '—'}
+                        {(eleve as any).cne || '—'}
                       </td>
                       {/* Classe */}
                       <td className="px-4 py-3 text-slate-600">
@@ -393,7 +394,12 @@ const NotesIndex: React.FC = () => {
                       </td>
                       {/* Niveau */}
                       <td className="px-4 py-3 text-slate-600">
-                        {eleve.classe?.niveau?.nom || eleve.classe?.niveau || '—'}
+                        {(() => {
+                          const raw = eleve.classe?.niveau as any;
+                          if (!raw) return '—';
+                          if (typeof raw === 'object') return raw.nom || '—';
+                          return String(raw);
+                        })()}
                       </td>
                       {/* Actions */}
                       <td className="px-4 py-3 text-right">

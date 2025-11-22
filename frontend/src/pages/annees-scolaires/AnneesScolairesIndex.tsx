@@ -33,8 +33,8 @@ const AnneesScolairesIndex: React.FC = () => {
           { label: 'Années Scolaires', link: '/annees-scolaires' }
         ]}
         actions={[
-          isSuperAdmin ? { label: 'Nouvelle année', link: '/annees-scolaires/new', variant: 'primary' } : undefined
-        ].filter(Boolean)}
+          isSuperAdmin ? { label: 'Nouvelle année', link: '/annees-scolaires/new', variant: 'primary' as const } : undefined
+        ].filter((action): action is { label: string; link: string; variant: 'primary' } => action !== undefined)}
       />
 
       <Card>

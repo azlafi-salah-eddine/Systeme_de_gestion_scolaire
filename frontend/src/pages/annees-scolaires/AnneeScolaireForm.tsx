@@ -14,22 +14,21 @@ interface AnneeScolaireFormProps {
 }
 
 const schema = yup.object({
-  annee_debut: yup
-    .number()
-    .required('L\'année de début est obligatoire')
-    .min(2000, 'L\'année de début doit être supérieure à 2000')
-    .max(2100, 'L\'année de début doit être inférieure à 2100')
-    .integer('L\'année de début doit être un nombre entier'),
-  annee_fin: yup
-    .number()
-    .required('L\'année de fin est obligatoire')
-    .min(2000, 'L\'année de fin doit être supérieure à 2000')
-    .max(2100, 'L\'année de fin doit être inférieure à 2100')
-    .integer('L\'année de fin doit être un nombre entier')
-    .test('greater-than-start', 'L\'année de fin doit être supérieure à l\'année de début', function(value) {
-      const { annee_debut } = this.parent;
-      return value > annee_debut;
+  nom: yup
+    .string()
+    .required('Le nom est obligatoire')
+    .matches(/\d{4}-\d{4}/, 'Format attendu: AAAA-AAAA'),
+  date_debut: yup
+    .string()
+    .required('La date de début est obligatoire'),
+  date_fin: yup
+    .string()
+    .required('La date de fin est obligatoire')
+    .test('greater-than-start', 'La date de fin doit être après la date de début', function(value) {
+      const { date_debut } = this.parent;
+      return new Date(value) > new Date(date_debut);
     }),
+  description: yup.string().optional()
 });
 
 type FormData = yup.InferType<typeof schema>;
@@ -51,21 +50,26 @@ const AnneeScolaireForm: React.FC<AnneeScolaireFormProps> = ({
     formState: { errors },
     reset,
     watch,
-  } = useForm<FormData>({
-    resolver: yupResolver(schema),
+  } = useForm<FormData | Partial<FormData>>({
+    // Cast resolver to any to accommodate optional default values typing
+    resolver: yupResolver(schema) as any,
     defaultValues: {
-      annee_debut: anneeScolaire?.annee_debut || new Date().getFullYear(),
-      annee_fin: anneeScolaire?.annee_fin || new Date().getFullYear() + 1,
+      nom: anneeScolaire?.nom || `${new Date().getFullYear()}-${new Date().getFullYear() + 1}`,
+      date_debut: anneeScolaire?.date_debut || new Date().toISOString().slice(0,10),
+      date_fin: anneeScolaire?.date_fin || new Date(new Date().setFullYear(new Date().getFullYear()+1)).toISOString().slice(0,10),
+      description: anneeScolaire?.description || ''
     },
   });
 
-  const watchedAnneeDebut = watch('annee_debut');
+  const watchedNom = watch('nom');
 
   useEffect(() => {
     if (isEditing && anneeScolaire) {
       reset({
-        annee_debut: anneeScolaire.annee_debut,
-        annee_fin: anneeScolaire.annee_fin,
+        nom: anneeScolaire.nom,
+        date_debut: anneeScolaire.date_debut,
+        date_fin: anneeScolaire.date_fin,
+        description: anneeScolaire.description || ''
       });
     }
   }, [anneeScolaire, isEditing, reset]);
@@ -77,9 +81,9 @@ const AnneeScolaireForm: React.FC<AnneeScolaireFormProps> = ({
     try {
       let success = false;
       if (isEditing) {
-        success = await updateAnneeScolaire(anneeScolaire.id, data);
+        success = await updateAnneeScolaire(anneeScolaire.id, data as any);
       } else {
-        success = await createAnneeScolaire(data);
+        success = await createAnneeScolaire(data as any);
       }
 
       if (success) {
@@ -124,41 +128,47 @@ const AnneeScolaireForm: React.FC<AnneeScolaireFormProps> = ({
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                Année de Début
+                Nom (format AAAA-AAAA)
               </label>
               <Input
-                type="number"
-                {...register('annee_debut')}
-                error={errors.annee_debut?.message}
-                placeholder="Ex: 2024"
-                min="2000"
-                max="2100"
+                type="text"
+                {...register('nom')}
+                error={errors.nom?.message}
+                placeholder="2024-2025"
               />
             </div>
-
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                Année de Fin
+                Date de début
               </label>
               <Input
-                type="number"
-                {...register('annee_fin')}
-                error={errors.annee_fin?.message}
-                placeholder="Ex: 2025"
-                min={watchedAnneeDebut ? watchedAnneeDebut + 1 : 2001}
-                max="2100"
+                type="date"
+                {...register('date_debut')}
+                error={errors.date_debut?.message}
               />
             </div>
-
-            <div className="bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-800 rounded-md p-3">
-              <div className="flex">
-                <Icon name="info" className="h-5 w-5 text-blue-400 dark:text-blue-500" />
-                <div className="ml-3">
-                  <p className="text-sm text-blue-700 dark:text-blue-300">
-                    L'année scolaire sera affichée comme : <strong>{watchedAnneeDebut || 'XXXX'}/{watch('annee_fin') || 'YYYY'}</strong>
-                  </p>
-                </div>
-              </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                Date de fin
+              </label>
+              <Input
+                type="date"
+                {...register('date_fin')}
+                error={errors.date_fin?.message}
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                Description (optionnel)
+              </label>
+              <textarea
+                className="w-full rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2 text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-primary-500 focus:border-primary-500"
+                rows={3}
+                {...register('description')}
+              />
+              {errors.description?.message && (
+                <p className="mt-1 text-xs text-red-600 dark:text-red-400">{errors.description.message}</p>
+              )}
             </div>
 
             <div className="flex items-center justify-end space-x-3 pt-4">

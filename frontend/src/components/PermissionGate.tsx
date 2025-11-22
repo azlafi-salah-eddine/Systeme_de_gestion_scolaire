@@ -1,9 +1,9 @@
-import React, { ReactNode } from 'react';
+import React, { type ReactNode } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 
 interface PermissionGateProps {
   children: ReactNode;
-  permission: 'delete' | 'restore' | 'admin' | 'super_admin';
+  permission: 'delete' | 'restore' | 'admin' | 'super_admin' | 'force-delete';
   fallback?: ReactNode;
 }
 
@@ -23,6 +23,7 @@ export const PermissionGate: React.FC<PermissionGateProps> = ({
       case 'admin':
         return isAdmin();
       case 'super_admin':
+      case 'force-delete':
         return isSuperAdmin();
       default:
         return false;

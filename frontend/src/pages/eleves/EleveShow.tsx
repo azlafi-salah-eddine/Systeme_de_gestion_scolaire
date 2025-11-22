@@ -465,7 +465,11 @@ const EleveShow: React.FC = () => {
                       Niveau
                     </span>
                     <span className="block transition-all duration-300 text-sm/6 text-slate-600 group-hover:text-slate-700 dark:text-white group-hover:dark:text-slate-200 md:w-1/2">
-                      {eleve.classe?.niveau || 'Niveau non défini'}
+                      {(() => {
+                        const niveau = eleve.classe?.niveau;
+                        if (!niveau) return 'Niveau non défini';
+                        return typeof niveau === 'string' ? (niveau || 'Niveau non défini') : (niveau.nom || 'Niveau non défini');
+                      })()}
                     </span>
                   </div>
                 </div>
@@ -1211,7 +1215,7 @@ const EleveShow: React.FC = () => {
               setConfirmResetState(prev => ({ ...prev, loading: true }));
               const res = await api.post(`/v1/eleves/${id}/reset-password`);
               if (res.data?.success) {
-                showSuccess('Mot de passe réinitialisé avec succès');
+                showSuccess('Succès', 'Mot de passe réinitialisé avec succès');
                 // Recharger les données élève (pour temp_password)
                 const response = await eleveService.getEleve(parseInt(id as string));
                 // injecter user dans l'objet local pour affichage
@@ -1221,7 +1225,7 @@ const EleveShow: React.FC = () => {
               }
             } catch (e: any) {
               const msg = e?.response?.data?.message || 'Erreur lors de la réinitialisation';
-              showError(msg);
+              showError('Erreur', msg);
               setConfirmResetState(prev => ({ ...prev, loading: false }));
             }
           }}

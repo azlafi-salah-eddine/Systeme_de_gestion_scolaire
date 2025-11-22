@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect, type ReactNode } from 'react';
 import { authApi, sessionUtils } from '../services/api';
 
 // Types définis directement
@@ -9,6 +9,7 @@ interface User {
   prenom?: string;
   email: string;
   phone?: string;
+  telephone?: string;
   roles: string[];
   role?: {
     id: number;

@@ -24,11 +24,12 @@ export interface User {
 export interface Classe {
   id: number;
   nom: string;
-  niveau: string;
-  annee_scolaire: string;
+  niveau: string | { id: number; nom: string };
+  annee_scolaire?: string;
+  section?: string;
   capacite?: number;
-  created_at: string;
-  updated_at: string;
+  created_at?: string;
+  updated_at?: string;
 }
 
 export interface ParentEleve {
@@ -95,6 +96,20 @@ export interface Absence {
   updated_at: string;
 }
 
+export interface EleveListResponse {
+  success: boolean;
+  data: Eleve[];
+  message?: string;
+  pagination: {
+    total: number;
+    per_page: number;
+    current_page: number;
+    last_page: number;
+    from: number;
+    to: number;
+  };
+}
+
 export interface Paiement {
   id: number;
   eleve_id: number;
@@ -144,7 +159,7 @@ export interface Eleve {
   classe_id?: number;
   cantine_id?: number | null;
   transport_id?: number | null;
-  date_inscription: string;
+  date_inscription?: string;
   active: boolean;
   created_at: string;
   updated_at: string;
@@ -252,6 +267,7 @@ export interface Chauffeur {
   prenom: string;
   telephone: string;
   permis: string;
+  active?: boolean;
   created_at: string;
   updated_at: string;
 }
@@ -261,6 +277,7 @@ export interface Accompagnateur {
   nom: string;
   prenom: string;
   telephone: string;
+  active?: boolean;
   created_at: string;
   updated_at: string;
 }
@@ -270,6 +287,8 @@ export interface Cantine {
   nom: string;
   capacite: number;
   localisation: string;
+  created_at?: string;
+  updated_at?: string;
   // relations (optional when included)
   menus?: MenuItem[];
   eleves?: Pick<Eleve, 'id' | 'nom' | 'prenom' | 'nom_fr' | 'prenom_fr' | 'matricule'>[];

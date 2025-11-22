@@ -38,11 +38,11 @@ const AbsenceJustify: React.FC = () => {
           if (groupsResponse.success && groupsResponse.data) {
             // Trouver le groupe qui contient l'absence actuelle
             const currentGroup = groupsResponse.data.find(group => 
-              group.group.some(absence => absence.id === parseInt(id))
+              group.absences.some(absence => absence.id === parseInt(id))
             );
             
             if (currentGroup) {
-              setConsecutiveAbsences(currentGroup.group);
+              setConsecutiveAbsences(currentGroup.absences);
               // Activer la justification groupée si il y a plus d'une absence
               setJustifyConsecutive(false); // Temporairement désactivé pour debug
             } else {
